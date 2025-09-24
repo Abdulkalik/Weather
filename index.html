@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="no">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Enkel Vær-app (Uten API)</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="card">
+    <h1>Vær-appen</h1>
+    <p class="lead">Skriv inn en by og trykk "Hent vær". Data er test (ikke ekte).</p>
+
+    <!-- Input og knapp -->
+    <div class="controls">
+      <input id="cityInput" type="text" placeholder="Skriv bynavn" aria-label="By">
+      <button id="fetchBtn">Hent vær</button>
+    </div>
+
+    <!-- Her vises resultat -->
+    <section id="result"></section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
