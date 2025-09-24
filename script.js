@@ -1,34 +1,54 @@
-const demoWeather = {
-  Oslo: { temp: 15, desc: "sol og lettskyet" },
-  Bergen: { temp: 12, desc: "regn og skyer" },
-  Tromsø: { temp: 5, desc: "snø og kaldt" }
-};
+// Din API-nøkkel
+const API_KEY = "a1060362d5d2368e864a99df75de2208";
 
+// Hent elementer
 const cityInput = document.getElementById("cityInput");
 const fetchBtn = document.getElementById("fetchBtn");
+const geoBtn = document.getElementById("geoBtn");
 const result = document.getElementById("result");
+const errorEl = document.getElementById("error");
 
-// Funksjon: vis vær basert på by
-function showWeather(city) {
-  const data = demoWeather[city];
-  if (!data) {
-    result.innerHTML = `<p>Ingen værdata for <b>${city}</b>.</p>`;
-    return;
-  }
+// Vis feil
+function showError(msg) {
+  errorEl.textContent = msg;
+  result.innerHTML = "";
+}
 
+// Vis vær
+function showWeather(data) {
   result.innerHTML = `
-    <h2>${city}</h2>
-    <p><b>Temperatur:</b> ${data.temp}°C</p>
-    <p><b>Vær:</b> ${data.desc}</p>
+    <h2>${data.name}, ${data.sys.country}</h2>
+    <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png">
+    <p>${data.main.temp}°C (føles som ${data.main.feels_like}°C)</p>
+    <p>${data.weather[0].description}</p>
   `;
 }
 
-// Når bruker trykker på knappen
-fetchBtn.addEventListener("click", () => {
-  const city = cityInput.value.trim();
-  if (!city) {
-    result.innerHTML = "<p>Skriv inn en by.</p>";
-    return;
+// Hent vær for by
+async function fetchWeather(city) {
+  if (!city) return showError("Skriv inn en by.");
+  result.innerHTML = "Laster...";
+  try {
+    const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&lang=nb&appid=${API_KEY}`);
+    if (!res.ok) throw new Error("Fant ikke byen.");
+    const data = await res.json();
+    showWeather(data);
+  } catch (e) {
+    showError(e.message);
   }
-  showWeather(city);
+}
+
+
+
+// Knapp-trykk
+fetchBtn.addEventListener("click", () => fetchWeather(cityInput.value.trim()));
+cityInput.addEventListener("keydown", e => { if(e.key==="Enter") fetchWeather(cityInput.value.trim()); });
+
+// Geolokasjon
+geoBtn.addEventListener("click", () => {
+  if(!navigator.geolocation) return showError("Geolokasjon støttes ikke.");
+  navigator.geolocation.getCurrentPosition(pos => {
+    const {latitude, longitude} = pos.coords;
+    fetchWeatherByCoords(latitude, longitude);
+  }, () => showError("Kunne ikke hente posisjon."));
 });
